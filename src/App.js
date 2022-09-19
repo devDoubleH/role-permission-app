@@ -1,69 +1,61 @@
-import React from "react";
-import ListGroup from "react-bootstrap/ListGroup";
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
-import { collection, getDocs, setDoc, doc } from "firebase/firestore";
-import { ref, getDownloadURL } from "firebase/storage";
-import { storage } from "./firebase";
+import { ListGroup } from "react-bootstrap";
 
 function App() {
-  const [data, setData] = React.useState([]);
-  const [role, setRole] = React.useState();
-  const [images, setImages] = React.useState([]);
+  const [data, setData] = useState();
 
-  const capitialize = (str) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
-
-  React.useEffect(() => {
-    (async () => {
-      try {
-        const q = await getDocs(collection(db, "users"));
-        const data = q.docs.map((doc) => doc.data());
-        setData(data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        console.log("sent");
-      }
-    })();
-
-    (async () => {
-      try {
-        const q = await getDocs(collection(db, "roles"));
-        const data = q.docs.map((doc) => doc.data());
-        setRole(data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        console.log("sent");
-      }
-    })();
-
-    (async () => {})();
+  useEffect(() => {
+    const getData = async () => {
+      let result = [];
+      const querySnapshot = await getDocs(collection(db, "users"));
+      querySnapshot.forEach((doc) => {
+        result.push(doc.data());
+      });
+      setData(result);
+    };
+    getData();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      let dataRoles = [];
+      const roles = await getDocs(collection(db, "roles"));
+      roles.forEach((doc) => {
+        dataRoles.push(doc.data());
+      });
+
+      if (dataRoles && data) {
+        let newData = data.map((item) => {
+          let role = dataRoles.find((role) => role.role === item.role);
+          return { ...item, job: role.type };
+        });
+        setData(newData);
+      }
+    })();
+  }, [data]);
+
   return (
-    <div className="w-100 h-auto">
-      <div className="d-flex flex-column align-items-center justify-content-center">
-        <h1>Users</h1>
-        <ListGroup className="w-50">
-          {data.map((item, i) => (
-            <ListGroup.Item key={i}>{JSON.stringify(item)} </ListGroup.Item>
-          ))}
-        </ListGroup>
-
-        <h1>Roles</h1>
-        <ListGroup className="w-50">
-          {role?.map((item, i) => (
-            <ListGroup.Item key={i}>{JSON.stringify(item)} </ListGroup.Item>
-          ))}
-        </ListGroup>
-
-        <h1>Images</h1>
-        <ListGroup className="w-50">
-          {images.map((item, i) => (
-            <ListGroup.Item key={i}>{JSON.stringify(item)} </ListGroup.Item>
-          ))}
+    <div className="flex justify-content-center align-items-center h-100">
+      <div className="container w-25 h-auto">
+        <h1 className="text-center">Firebase Storage</h1>
+        <ListGroup>
+          {data &&
+            data.map((item, index) => {
+              return (
+                <ListGroup.Item key={index}>
+                  <img
+                    src={item.image}
+                    alt=""
+                    width="50"
+                    height="50"
+                    className="rounded-circle me-2 background-position-center background-size-cover background-repeat-no-repeat"
+                  />
+                  {item.name} - {item.job}
+                </ListGroup.Item>
+              );
+            })}
         </ListGroup>
       </div>
     </div>
