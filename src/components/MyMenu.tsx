@@ -21,7 +21,7 @@ function MyMenu(props: Props) {
   };
 
   const api = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: "https://role-permission-app.herokuapp.com/",
   });
 
   const { can, name } = props;

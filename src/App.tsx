@@ -22,7 +22,7 @@ import AddIcon from "@mui/icons-material/Add";
 import MyMenu from "./components/MyMenu.tsx";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "https://role-permission-app.herokuapp.com/",
 });
 
 const App: FC = () => {
