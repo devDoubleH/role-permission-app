@@ -1,5 +1,5 @@
 import React from "react";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,6 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import axios from "axios";
 
 function createData(
   name: string,
@@ -26,18 +27,39 @@ const rows = [
   createData("Gingerbread", 356, 16.0, 49, 3.9),
 ];
 
+const api = axios.create({
+  baseURL: "http://localhost:8000",
+});
+
 const App: FC = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    try {
+      api
+        .get("/api/users")
+        .then((res) => {
+          setData(res.data);
+        })
+        .finally(() => {
+          console.log("request finished");
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
   return (
     <div className="w-screen h-screen flex justify-center items-center p-10">
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Dessert (100g serving)</TableCell>
-              <TableCell align="right">Calories</TableCell>
-              <TableCell align="right">Fat&nbsp;(g)</TableCell>
-              <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-              <TableCell align="right">Protein&nbsp;(g)</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell align="right">Company</TableCell>
+              <TableCell align="right">Role</TableCell>
+              <TableCell align="right">Verified</TableCell>
+              <TableCell align="right">Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
